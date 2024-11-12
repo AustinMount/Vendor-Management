@@ -1,0 +1,24 @@
+import pandas as pd
+import plotly.express as px
+from openpyxl import load_workbook
+
+# Load data and calculate weighted scores
+data = pd.read_excel('vendor_scorecard.xlsx')
+weights = {'Delivery_Time': 0.3, 'Cost': 0.4, 'Quality_Score': 0.3}
+data['Weighted_Score'] = (
+    data['Delivery_Time'] * weights['Delivery_Time'] +
+    data['Cost'] * weights['Cost'] +
+    data['Quality_Score'] * weights['Quality_Score']
+)
+
+# Flag outliers
+data['Outlier'] = data['Weighted_Score'] < data['Weighted_Score'].quantile(0.05)
+
+# Save to Excel
+with pd.ExcelWriter('vendor_scorecard.xlsx', engine='openpyxl', mode='a') as writer:
+    data.to_excel(writer, sheet_name='Weighted_Scores', index=False)
+
+# Plot and save
+fig = px.scatter(data, x='Vendor', y='Weighted_Score', color='Outlier', title="Vendor Weighted Scores", labels={'Weighted_Score': 'Score'})
+fig.write_image('vendor_scores_scatter.png')
+print("Weighted scores saved to Excel. Scatter plot saved as vendor_scores_scatter.png.")
