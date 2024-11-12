@@ -1,0 +1,32 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from openpyxl import load_workbook
+
+# Load and preprocess data function remains the same
+data = pd.read_excel('portfolio_data.xlsx')
+
+# Monte Carlo VaR calculation
+def monte_carlo_var(data, iterations=10000, confidence_level=0.05):
+    returns = data['Return'].values
+    sim_returns = np.random.choice(returns, (iterations, len(returns)))
+    sim_end_values = np.cumprod(1 + sim_returns, axis=1)[:, -1]
+    var = np.percentile(sim_end_values, confidence_level * 100)
+    return var
+
+# Calculate metrics
+var = monte_carlo_var(data)
+average_return = data['Return'].mean()
+std_dev = data['Return'].std()
+sharpe_ratio = average_return / std_dev
+metrics = pd.DataFrame({'Metric': ['VaR', 'Sharpe Ratio'], 'Value': [var, sharpe_ratio]})
+
+# Save metrics to Excel
+with pd.ExcelWriter('portfolio_data.xlsx', engine='openpyxl', mode='a') as writer:
+    metrics.to_excel(writer, sheet_name='Risk_Metrics', index=False)
+
+# Save histogram
+plt.hist(data['Return'], bins=30, edgecolor='black')
+plt.title('Distribution of Portfolio Returns')
+plt.savefig('portfolio_returns_histogram.png')
+print("Risk metrics saved to Excel. Histogram saved as portfolio_returns_histogram.png.")
