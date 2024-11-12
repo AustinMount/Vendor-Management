@@ -1,0 +1,16 @@
+import pandas as pd
+import plotly.express as px
+from openpyxl import load_workbook
+
+# Load or fetch data function remains the same
+data = pd.read_excel('financial_data.xlsx')
+agg_data = data.groupby('Symbol').agg({'Volume': 'sum', '4. close': 'mean'}).reset_index()
+
+# Save summary back to Excel
+with pd.ExcelWriter('financial_data.xlsx', engine='openpyxl', mode='a') as writer:
+    agg_data.to_excel(writer, sheet_name='Summary_Aggregate', index=False)
+
+# Interactive plot saved as an image
+fig = px.bar(agg_data, x='Symbol', y='4. close', title="Average Closing Prices by Symbol", labels={'4. close': 'Avg Close'})
+fig.write_image('closing_prices.png')
+print("Data aggregated and saved. Plot saved as closing_prices.png.")
