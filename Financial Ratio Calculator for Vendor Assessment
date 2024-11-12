@@ -1,0 +1,14 @@
+import pandas as pd
+from openpyxl import load_workbook
+
+# Load data and calculate financial ratios
+data = pd.read_excel('vendor_financials.xlsx')
+data['Debt_to_Equity'] = data['Total_Debt'] / data['Equity']
+data['Current_Ratio'] = data['Current_Assets'] / data['Current_Liabilities']
+data['High_Debt_Flag'] = data['Debt_to_Equity'] > 2
+data['Low_Liquidity_Flag'] = data['Current_Ratio'] < 1
+
+# Save to Excel
+with pd.ExcelWriter('vendor_financials.xlsx', engine='openpyxl', mode='a') as writer:
+    data.to_excel(writer, sheet_name='Financial_Ratios', index=False)
+print("Financial ratios and flags saved to Excel.")
