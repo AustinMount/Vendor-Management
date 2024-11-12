@@ -1,0 +1,12 @@
+import pandas as pd
+from openpyxl import load_workbook
+
+# Load data and calculate discrepancies
+data = pd.read_excel('transactions.xlsx')
+data['Difference'] = data['Expected_Amount'] - data['Actual_Amount']
+discrepancies = data[data['Difference'] != 0]
+
+# Save to Excel
+with pd.ExcelWriter('transactions.xlsx', engine='openpyxl', mode='a') as writer:
+    discrepancies.to_excel(writer, sheet_name='Discrepancies', index=False)
+print("Discrepancies saved to Excel.")
